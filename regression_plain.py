@@ -5,10 +5,8 @@ evaluete the model's performanc using r2 score as the main metric.
 """
 import pandas as pd
 import numpy as np
-import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score
 from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
@@ -16,8 +14,6 @@ from sklearn.metrics import mean_squared_error
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.preprocessing import TargetEncoder
