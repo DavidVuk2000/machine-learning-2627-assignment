@@ -26,19 +26,22 @@ from xgboost import XGBRegressor
 df=pd.read_csv("data.csv")
 
 #Cleaning the data.
-def clean_data(df):
+def clean_data_zscore(df):
     df = df.drop(columns=["Unnamed: 0"])  # Drop the index column if it exists 
     df = df.dropna(subset=["sale_price"])  # Drop rows with missing sale_price
     df = df.drop_duplicates()  # Drop duplicate rows
-    df = df[(df.sale_price > 50) & (df.sale_price < 200000)].copy()  # Filter out extreme sale prices
-    df = df[(df.mileage > 0) & (df.mileage < 300000)].copy()  # Filter out extreme mileage values
+    # Using z-score to filter out extreme values for sale_price and mileage
+    df['sale_price'] = np.log1p(df['sale_price'])  # Log-transform sale_price to reduce skewness
+    # Z-score calculation for sale_price and mileage 
+    z_score_sale_price = (df['sale_price'] - df['sale_price'].mean()) / df['sale_price'].std()
+    z_score_mileage = (df['mileage'] - df['mileage'].mean()) / df['mileage'].std()
+    df = df[(np.abs(z_score_sale_price) <= 3) & (np.abs(z_score_mileage) <= 3)].copy()  # Filter out extreme values based on z-score
     df["engine_cylinders"] = df["engine_cylinders"].str.extract(r"(\d+)", expand=False).astype(float)  # Extract numeric values from engine_cylinders. etc: 6_cylinders becomes just 6.
     return df
 
-df = clean_data(df)
+df = clean_data_zscore(df)
 X = df.drop(columns=["sale_price"])  # Features
-y = np.log1p(df["sale_price"])  # Target variable (log-transformed sale price) instead of sale_price to reduce skewness and improve model performance
-#y = df["sale_price"]  
+y = df["sale_price"]  # Target variable
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Imputation + encoding.
@@ -75,7 +78,7 @@ plt.plot([y_train.min(), y_train.max()], [y_train.min(), y_train.max()], 'r--', 
 plt.xlabel("True Values")
 plt.ylabel("Predictions")
 plt.title("Linear Regression Model on Training Data")
-plt.savefig("Figures/linearRegression_baseline.png")
+plt.savefig("Figures/Baselines_models/linearRegression_baseline.png")
 
 # Random Forest Regressor model
 rf_model = Pipeline([("pre", pre), ("reg", RandomForestRegressor(n_estimators=50, random_state=42, n_jobs=-1, max_depth=10, max_samples=0.8, min_samples_leaf=5))]) # Added restirictions otherwise it takes too long to run
@@ -93,7 +96,7 @@ plt.plot([y_train.min(), y_train.max()], [y_train.min(), y_train.max()], 'r--', 
 plt.xlabel("True Values")
 plt.ylabel("Predictions")
 plt.title("Random Forest Model on Training Data")
-plt.savefig("Figures/randomForest_baseline.png")
+plt.savefig("Figures/Baselines_models/randomForest_baseline.png")
 
 # Ridge regression model
 from sklearn.linear_model import Ridge
@@ -111,7 +114,7 @@ plt.plot([y_train.min(), y_train.max()], [y_train.min(), y_train.max()], 'r--', 
 plt.xlabel("True Values")
 plt.ylabel("Predictions")
 plt.title("Ridge Regression Model on Training Data")
-plt.savefig("Figures/ridgeRegression_baseline.png")
+plt.savefig("Figures/Baselines_models/ridgeRegression_baseline.png")
 
 # XGB Regressor model
 xgb_model = Pipeline([("pre", pre), ("reg", XGBRegressor(n_estimators=50, random_state=42, n_jobs=-1, max_depth=10, subsample=0.8, min_child_weight=5))]) # Added restrictions otherwise it takes too long to run
@@ -129,7 +132,7 @@ plt.plot([y_train.min(), y_train.max()], [y_train.min(), y_train.max()], 'r--', 
 plt.xlabel("True Values")
 plt.ylabel("Predictions")
 plt.title("XGB Regressor Model on Training Data")
-plt.savefig("Figures/xgbRegression_baseline.png")
+plt.savefig("Figures/Baselines_models/xgbRegression_baseline.png")
 
 
                                                                                     
