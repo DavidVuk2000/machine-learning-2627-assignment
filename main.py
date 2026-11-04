@@ -23,6 +23,18 @@ numeric_df = df.select_dtypes(include=['float64', 'int64'])
 # removing the index row called 'Unnamed: 0' (this is the index column)
 numeric_df = numeric_df.drop(columns=['Unnamed: 0'])
 print("Numeric columns in the dataset: \n", numeric_df.columns)
+print("Basic statistics of the numerical columns:\n", numeric_df.describe())
+
+# Histograms of the numerical values
+fig, axes = plt.subplots(nrows=len(numeric_df.columns), ncols=1, figsize=(10, 5 * len(numeric_df.columns)))
+for column in numeric_df.columns:
+    axes[numeric_df.columns.get_loc(column)].hist(numeric_df[column], bins=30, edgecolor='black', alpha=0.7)
+    axes[numeric_df.columns.get_loc(column)].set_title(f"Histogram of {column}")
+    axes[numeric_df.columns.get_loc(column)].set_xlabel(column)
+    axes[numeric_df.columns.get_loc(column)].set_ylabel("Frequency")
+plt.savefig("Figures/histograms_numerical.png")
+
+# Correlation matrix for the numerical columns
 correlation_matrix = numeric_df.corr()
 plt.figure(figsize=(10, 8))
 sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
