@@ -1,5 +1,5 @@
 import warnings
-
+import math
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,10 +19,24 @@ from sklearn.model_selection import RandomizedSearchCV
 from xgboost import XGBRegressor
 import time
 
+size_text = 14   # change this one number to scale all text
+plt.rcParams.update({
+    'font.size':        size_text,        # base size (text, annotations)
+    'axes.titlesize':   size_text + 2,    # subplot titles
+    'axes.labelsize':   size_text,        # x and y axis labels
+    'xtick.labelsize':  size_text - 2,    # tick numbers
+    'ytick.labelsize':  size_text - 2,
+    'legend.fontsize':  size_text - 2,
+    'figure.titlesize': size_text - 2,    # fig.suptitle
+})
+
 warnings.filterwarnings("ignore")
 
 #load the dataset data.csv
 df=pd.read_csv("data.csv")
+# Im printing all column names
+print(df.columns)
+
 
 # Histograms of the numerical values before cleaning with z-score
 numeric_df_before = df.select_dtypes(include=['float64', 'int64'])
@@ -52,11 +66,36 @@ df = clean_data_zscore(df)
 
 # Histograms of the numerical values after cleaning with z-score
 numeric_df_after = df.select_dtypes(include=['float64', 'int64'])
-fig, axes = plt.subplots(nrows=len(numeric_df_after.columns), ncols=1, figsize=(10, 5 * len(numeric_df_after.columns)))
-for column in numeric_df_after.columns:
-    axes[numeric_df_after.columns.get_loc(column)].hist(numeric_df_after[column], bins=30, edgecolor='black', alpha=0.7)
-    axes[numeric_df_after.columns.get_loc(column)].set_title(f"Histogram of {column}")
-    axes[numeric_df_after.columns.get_loc(column)].set_xlabel(column)
-    axes[numeric_df_after.columns.get_loc(column)].set_ylabel("Frequency")
-plt.savefig("Figures/DataVisualization/histograms_numerical_after.png")
+
+n = len(numeric_df_after.columns)
+ncols = 2
+nrows = math.ceil(n / ncols)
+
+fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(15, 5 * nrows))
+axes = np.atleast_1d(axes).flatten()      # must come BEFORE the loop
+
+for i, column in enumerate(numeric_df_after.columns):
+    ax = axes[i]
+    data = numeric_df_after[column].dropna()
+
+    if column == 'sale_price':
+        data = data[data > 0]                       # log scale can't show 0
+        bins = np.logspace(np.log10(data.min()), np.log10(data.max()), 31)
+        ax.hist(data, bins=bins, edgecolor='black', alpha=0.7)
+        ax.set_xscale('log')
+        ax.set_xlabel(f"{column} (log scale)")
+    else:
+        ax.hist(data, bins=30, edgecolor='black', alpha=0.7)
+        ax.set_xlabel(column)
+
+    ax.set_title(f"Histogram of {column}")
+    ax.set_ylabel("Frequency")
+
+# hide unused cells
+for j in range(n, len(axes)):
+    axes[j].set_visible(False)
+
+plt.tight_layout()
+plt.savefig("Figures/DataVisualization/histograms_numerical_after.png", dpi=300)
+plt.show()
 
