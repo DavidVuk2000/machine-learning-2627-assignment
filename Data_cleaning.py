@@ -17,6 +17,7 @@ from sklearn.preprocessing import TargetEncoder
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV
 from xgboost import XGBRegressor
+import seaborn as sns
 import time
 
 size_text = 14   # change this one number to scale all text
@@ -98,4 +99,10 @@ for j in range(n, len(axes)):
 plt.tight_layout()
 plt.savefig("Figures/DataVisualization/histograms_numerical_after.png", dpi=300)
 plt.show()
+
+correlation_matrix = numeric_df_after.corr()
+plt.figure(figsize=(10, 8))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+plt.title("Correlation Matrix")
+plt.savefig("Figures/correlation_matrix_numerical_after.png")
 
