@@ -29,7 +29,7 @@ def clean_data(df):
     df = df.dropna(subset=["sale_price"])  # Drop rows with missing sale_price
     df = df.drop_duplicates()  # Drop duplicate rows
     df = df[(df.sale_price > 50) & (df.sale_price < 200000)].copy()  # Filter out extreme sale prices
-    df = df[(df.mileage > 0) & (df.mileage < 300000)].copy()  # Filter out extreme mileage values
+    df = df[(df.mileage > 0) & (df.mileage < 300000) | df.mileage.isna()].copy()  # Filter out extreme mileage values, but without droping rows with missing mileage.
     df["engine_cylinders"] = df["engine_cylinders"].str.extract(r"(\d+)", expand=False).astype(float)  # Extract numeric values from engine_cylinders. etc: 6_cylinders becomes just 6.
     return df
 
@@ -51,7 +51,7 @@ pre = ColumnTransformer([
     ("ohe", Pipeline([("imp", SimpleImputer(strategy="constant", fill_value="missing")),
                       ("enc", OneHotEncoder(handle_unknown="ignore"))]), onehot_cols),
     ("te", Pipeline([("imp", SimpleImputer(strategy="constant", fill_value="missing")),
-                     ("enc", TargetEncoder())]), target_cols),
+                     ("enc", TargetEncoder(random_state=42))]), target_cols), #I added a random_state to the TargetEncoder for reproducibility
 ])  # all 15 feature columns are used
 
 # Define the KFold cross-validation strategy
