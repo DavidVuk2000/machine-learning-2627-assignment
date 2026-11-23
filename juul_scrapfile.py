@@ -31,42 +31,7 @@ plt.rcParams.update({
     'figure.titlesize': size_text - 2,    # fig.suptitle
 })
 
-df=pd.read_csv("data.csv")
-
-import warnings
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.model_selection import cross_val_predict, train_test_split, cross_validate, cross_val_score
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error, r2_score
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import mean_squared_error
-from sklearn.impute import SimpleImputer
-from sklearn.model_selection import KFold
-from sklearn.pipeline import Pipeline
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.preprocessing import TargetEncoder
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import RandomizedSearchCV
-from xgboost import XGBRegressor
-import time
-warnings.filterwarnings("ignore")
-
-size_text = 14   # change this one number to scale all text
-plt.rcParams.update({
-    'font.size':        size_text,        # base size (text, annotations)
-    'axes.titlesize':   size_text + 2,    # subplot titles
-    'axes.labelsize':   size_text,        # x and y axis labels
-    'xtick.labelsize':  size_text - 2,    # tick numbers
-    'ytick.labelsize':  size_text - 2,
-    'legend.fontsize':  size_text - 2,
-    'figure.titlesize': size_text - 2,    # fig.suptitle
-})
-
-
+"""
 #load the dataset data.csv
 df=pd.read_csv("data.csv")
 
@@ -121,7 +86,6 @@ print(cat_summary.to_string(index=False))
 print("Double rows for numerical values: \n", numeric_df.duplicated().sum())
 
 
-"""
 
 def clean_data_zscore(df):
     df = df.drop(columns=["Unnamed: 0"])  # Drop the index column if it exists 
