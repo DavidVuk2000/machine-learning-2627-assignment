@@ -20,10 +20,23 @@ from xgboost import XGBRegressor
 import time
 warnings.filterwarnings("ignore")
 
+size_text = 14   # change this one number to scale all text
+plt.rcParams.update({
+    'font.size':        size_text,        # base size (text, annotations)
+    'axes.titlesize':   size_text + 2,    # subplot titles
+    'axes.labelsize':   size_text,        # x and y axis labels
+    'xtick.labelsize':  size_text - 2,    # tick numbers
+    'ytick.labelsize':  size_text - 2,
+    'legend.fontsize':  size_text - 2,
+    'figure.titlesize': size_text - 2,    # fig.suptitle
+})
+
+
 #load the dataset data.csv
 df=pd.read_csv("data.csv")
 
-#Cleaning the data.
+"""
+#Cleaning the data
 def clean_data(df):
     df = df.drop(columns=["Unnamed: 0"])  # Drop the index column if it exists 
     df = df.dropna(subset=["sale_price"])  # Drop rows with missing sale_price
@@ -32,10 +45,23 @@ def clean_data(df):
     df = df[(df.mileage > 0) & (df.mileage < 300000) | df.mileage.isna()].copy()  # Filter out extreme mileage values, but without droping rows with missing mileage.
     df["engine_cylinders"] = df["engine_cylinders"].str.extract(r"(\d+)", expand=False).astype(float)  # Extract numeric values from engine_cylinders. etc: 6_cylinders becomes just 6.
     return df
+"""
 
-df = clean_data(df)
+def clean_data_zscore(df):
+    df = df.drop(columns=["Unnamed: 0"])  # Drop the index column if it exists 
+    df = df.dropna(subset=["sale_price"])  # Drop rows with missing sale_price
+    df = df.drop_duplicates()  # Drop duplicate rows
+    # Using z-score to filter out extreme values for sale_price and mileage
+    df['sale_price'] = np.log1p(df['sale_price'])  # Log-transform sale_price to reduce skewness
+    z_score_sale_price = (df['sale_price'] - df['sale_price'].mean()) / df['sale_price'].std()
+    z_score_mileage = (df['mileage'] - df['mileage'].mean()) / df['mileage'].std()
+    df = df[(np.abs(z_score_sale_price) <= 3) & (np.abs(z_score_mileage) <= 3)].copy()  # Filter out extreme values based on z-score
+    df["engine_cylinders"] = df["engine_cylinders"].str.extract(r"(\d+)", expand=False).astype(float)  # Extract numeric values from engine_cylinders. etc: 6_cylinders becomes just 6.
+    return df
+
+df = clean_data_zscore(df)
 X = df.drop(columns=["sale_price"])  # Features
-y = np.log1p(df["sale_price"])  # Target variable (log-transformed sale price) instead of sale_price to reduce skewness and improve model performance
+y = df["sale_price"]  # Target variable (log-transformed sale price) instead of sale_price to reduce skewness and improve model performance
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 print("Training set size:", X_train.shape)
 
