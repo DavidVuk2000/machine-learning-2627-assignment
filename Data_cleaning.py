@@ -64,7 +64,7 @@ def split_data(data, target):
     X_train, y_train = clean_data_zscore(X_train, y_train, target)
     return X_train, X_test, y_train, y_test
 
-def preprocessor(target, one_hot=True):
+def preprocessor(target):
     num_features = [col for col in numerical_columns if col != target]
     num = Pipeline([
         ("impute", SimpleImputer(strategy="median")),
@@ -72,13 +72,17 @@ def preprocessor(target, one_hot=True):
     ])
     transformers = [("num", num, num_features)]
 
-    if one_hot:
-        categorical_features = [col for col in catagorical_columns_20 if col != target]
-        low = Pipeline([
+    categorical_features = [col for col in catagorical_columns_20 if col != target]
+    low = Pipeline([
+        ("impute", SimpleImputer(strategy="constant", fill_value="missing")),
+        ("ohe", OneHotEncoder(handle_unknown="ignore", drop="if_binary", sparse_output=False))])
+    transformers.append(("low", low, categorical_features))
+
+    cat_high_features = [col for col in catagorical_columns_other if col != target]
+    high = Pipeline([
             ("impute", SimpleImputer(strategy="constant", fill_value="missing")),
-            ("ohe", OneHotEncoder(handle_unknown="ignore", drop="if_binary",
-                                  sparse_output=False)),
-        ])
-        transformers.append(("low", low, categorical_features))
+            ("target", TargetEncoder(target_type="auto", smooth="auto", cv=5, shuffle=True, random_state=42))])
+    transformers.append(("high", high, cat_high_features))
+
     return ColumnTransformer(transformers, remainder="drop", sparse_threshold=0)
 
