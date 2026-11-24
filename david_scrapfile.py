@@ -5,7 +5,10 @@ import numpy as np
 
 plt.rcParams["toolbar"] = "None"
 
+#%%
+
 #Cleaning the data.
+
 def clean_data_David_v1(df):
     df = df.drop(columns=["Unnamed: 0"])  # Drop the index column if it exists 
     df = df.dropna(subset=["sale_price"])  # Drop rows with missing sale_price
@@ -23,6 +26,11 @@ df = pd.read_csv("data.csv")
 
 df.head()
 
+print("1")
+ 
+#%%
+
+print("2")
 numeric_df = df.select_dtypes(include=['float64', 'int64'])
 
 print("wa:" + str(df['vehicle_condition'].dtype))
@@ -52,6 +60,8 @@ for ax, condition in zip(axes, conditions):
 axes[0].set_ylabel("Count")
 fig.tight_layout(h_pad=3.0)
 plt.show()
+
+#%%
 
 body_styles = cleaned_df["body_style"].dropna().unique()
 fig, axes = plt.subplots(
