@@ -23,6 +23,14 @@ def clean_raw(df, target):
     df = df.dropna(subset=[target]) 
     df = df.drop_duplicates() 
 
+        # fixed rules for impossible values (applied to all rows, before the split)
+    df = df[(df["sale_price"] >= 500) & (df["sale_price"] <= 300_000)]
+    df = df[~(df["mileage"] > 500_000)]                                   # impossible mileage; ~ keeps NaN mileage
+
+    # near-duplicates: exact same car posted in several regions/states
+    dup_cols = [c for c in df.columns if c not in ["region", "location"]]
+    df = df.drop_duplicates(subset=dup_cols)
+
     cylinders = df["engine_cylinders"].str.extract(r"(\d+)", expand=False).astype(float) # converting the engine column
     df["engine_cylinders_status"] = np.where(cylinders.isna(), "Unknown", "Known")
     df["engine_cylinders"] = cylinders
