@@ -23,7 +23,7 @@ def clean_raw(df, target):
     df = df.dropna(subset=[target]) 
     df = df.drop_duplicates() 
 
-        # fixed rules for impossible values (applied to all rows, before the split)
+    # fixed rules for impossible values (applied to all rows, before the split)
     df = df[(df["sale_price"] >= 500) & (df["sale_price"] <= 300_000)]
     df = df[~(df["mileage"] > 500_000)]                                   # impossible mileage; ~ keeps NaN mileage
 
@@ -38,7 +38,7 @@ def clean_raw(df, target):
     df["sale_price"] = np.log1p(df["sale_price"]) # log transforming the target value 
     return df
 
-#Cleaning the data.
+#Cleaning the numerical data
 def clean_data_zscore(X, y, target):
     if target == "sale_price":
         z_price = (y - y.mean()) / y.std()
