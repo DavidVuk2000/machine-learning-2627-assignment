@@ -27,7 +27,6 @@ def clean_raw(df, target):
     df = df[(df["sale_price"] >= 500) & (df["sale_price"] <= 300_000)]
     df = df[~(df["mileage"] > 500_000)]                                   # impossible mileage; ~ keeps NaN mileage
 
-
     cylinders = df["engine_cylinders"].str.extract(r"(\d+)", expand=False).astype(float) # converting the engine column
     df["engine_cylinders_status"] = np.where(cylinders.isna(), "Unknown", "Known")
     df["engine_cylinders"] = cylinders
